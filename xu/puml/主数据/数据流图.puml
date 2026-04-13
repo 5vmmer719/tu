@@ -1,0 +1,23 @@
+@startuml
+
+start
+:接收POST /material请求;
+
+partition "MaterialServiceImpl.save  @Transactional" {
+  :DTO转换为MaterialPO;
+
+  :查询数据库中是否存在相同编码;
+  if (编码已存在?) then (是)
+    :抛出BusinessException;
+    stop
+  else (否)
+  endif
+
+  :设置默认值\n（quantity、safetyStock默认为0）;
+  :调用MyBatis-Plus save()插入数据库;
+}
+
+:返回成功响应;
+stop
+
+@enduml

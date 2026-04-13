@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "系统用户" as User
+
+
+    usecase "物料管理\n维护物料编码/名称/规格/单位" as UC_Material
+    usecase "车型管理\n多品种车型信息" as UC_Vehicle
+    usecase "制造BOM管理\n物料清单/产品结构" as UC_MBOM
+    usecase "生产资源管理\n设备/工位/人员" as UC_Resource
+
+' 用户与用例的关联
+User --> UC_Material
+User --> UC_Vehicle
+User --> UC_MBOM
+User --> UC_Resource
+
+' 用例关系
+UC_MBOM .> UC_Material : <<include>>
+UC_Vehicle .> UC_MBOM : <<extend>>
+
+@enduml

@@ -1,0 +1,110 @@
+@startuml 库存管理与调拨模块类图
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam arrowFontSize 18
+' ========== Controller 层 ==========
+class StockInfoController {
+  - stockInfoService: StockInfoService
+  + list(): AjaxResult
+  + getInfo(): AjaxResult
+  + export(): void
+}
+
+class AllotOrderController {
+  - allotOrderService: AllotOrderService
+  + list(): AjaxResult
+  + add(): AjaxResult
+  + edit(): AjaxResult
+  + remove(): AjaxResult
+  + confirm(): AjaxResult
+}
+
+' ========== Service 层 ==========
+interface StockInfoService {
+  + selectStockInfoList(): List<StockInfo>
+  + selectStockInfo(): StockInfo
+  + updateStock(): int
+  + checkSafetyStock(): void
+}
+
+interface AllotOrderService {
+  + selectAllotOrderList(): List<StockAllotOrder>
+  + insertAllotOrder(): int
+  + updateAllotOrder(): int
+  + deleteAllotOrder(): int
+  + confirmAllot(): int
+}
+
+class StockInfoServiceImpl {
+  - stockInfoMapper: StockInfoMapper
+  - recordService: StockRecordService
+  + selectStockInfoList(): List<StockInfo>
+  + selectStockInfo(): StockInfo
+  + updateStock(): int
+  + checkSafetyStock(): void
+}
+
+class AllotOrderServiceImpl {
+  - allotOrderMapper: AllotOrderMapper
+  - stockInfoService: StockInfoService
+  + selectAllotOrderList(): List<StockAllotOrder>
+  + insertAllotOrder(): int
+  + updateAllotOrder(): int
+  + deleteAllotOrder(): int
+  + confirmAllot(): int
+}
+
+' ========== Entity 层 ==========
+class StockInfo {
+  - infoId: Long
+  - warehouseCode: String
+  - locationCode: String
+  - matCode: String
+  - batchNo: String
+  - quantity: BigDecimal
+  - supplierCode: String
+}
+
+class StockRecord {
+  - recordId: Long
+  - warehouseCode: String
+  - locationCode: String
+  - labelId: Long
+  - recordType: String
+  - matCode: String
+  - quantity: BigDecimal
+  - orderNo: String
+}
+
+class StockAllotOrder {
+  - allotId: Long
+  - allotNo: String
+  - fromWarehouseCode: String
+  - toWarehouseCode: String
+  - allotStatus: String
+  - allotProgress: String
+  - allotReason: String
+}
+
+class StockAllotDetail {
+  - detailId: Long
+  - allotNo: String
+  - matCode: String
+  - batchNo: String
+  - allotQuantity: BigDecimal
+}
+
+' ========== 依赖关系 ==========
+StockInfoController --> StockInfoService : 依赖
+AllotOrderController --> AllotOrderService : 依赖
+StockInfoService <|.. StockInfoServiceImpl : 实现
+AllotOrderService <|.. AllotOrderServiceImpl : 实现
+StockInfoServiceImpl ..> StockInfo : 操作
+StockInfoServiceImpl ..> StockRecord : 生成
+AllotOrderServiceImpl ..> StockAllotOrder : 操作
+AllotOrderServiceImpl --> StockInfoService : 依赖
+StockAllotOrder --> StockAllotDetail : 包含
+StockAllotDetail --> StockInfo : 更新
+
+@enduml
+

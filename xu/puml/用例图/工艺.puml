@@ -1,0 +1,35 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "系统用户" as User
+
+
+    usecase "工艺管理\n维护工序基本信息" as UC_Process
+    usecase "工艺路线管理\n定义工序顺序/参数" as UC_Route
+    usecase "工作日历管理\n工作时间/休息日/节假日" as UC_WorkCalendar
+    usecase "生产订单管理\n创建/编辑/审核/状态跟踪" as UC_MO
+    usecase "VIN追溯\n生产履历/质量追溯" as UC_VIN
+
+
+' 外部引用(来自主数据管理模块)
+usecase "物料管理" as UC_Material_Ref #LightGray
+usecase "制造BOM管理" as UC_MBOM_Ref #LightGray
+
+' 用户与用例的关联
+User --> UC_Process
+User --> UC_Route
+User --> UC_WorkCalendar
+User --> UC_MO
+User --> UC_VIN
+
+' 模块内用例关系
+UC_Route .> UC_Process : <<include>>
+
+' 跨模块依赖关系
+UC_MO .> UC_Material_Ref : <<include>>
+UC_MO .> UC_MBOM_Ref : <<extend>>
+UC_VIN .> UC_MO : <<include>>
+
+@enduml

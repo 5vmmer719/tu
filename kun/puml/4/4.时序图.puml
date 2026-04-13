@@ -1,0 +1,32 @@
+@startuml
+hide footbox
+actor 仓管员
+participant "前端页面" as Frontend
+participant "StockAllotOrderController" as Controller
+participant "StockAllotOrderServiceImpl" as Service
+database "MySQL数据库" as DB
+
+仓管员 -> Frontend: 点击新增，填写调拨信息
+Frontend -> Frontend: 表单验证
+
+Frontend -> Controller: POST /stock/allotOrder
+Controller -> Controller: 权限校验，校验仓库不同
+
+Controller -> Service: insertStockAllotOrder(username, allotOrder)
+Service -> Service: 生成调拨单号，设置状态
+
+group 处理调拨明细
+  Service -> Service: 设置每条明细的单号、仓库编码、行号
+end
+
+Service -> DB: 批量插入调拨明细
+DB --> Service: 返回插入结果
+
+Service -> DB: 插入调拨单主表
+DB --> Service: 返回影响行数
+
+Service --> Controller: 返回结果
+Controller --> Frontend: 返回AjaxResult响应
+Frontend --> 仓管员: 显示创建成功
+
+@enduml

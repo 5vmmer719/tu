@@ -1,0 +1,46 @@
+@startuml
+skinparam shadowing false
+skinparam defaultFontSize 13
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam ParticipantPadding 8
+skinparam BoxPadding 5
+skinparam sequenceArrowThickness 1.5
+hide footbox
+
+actor 操作人员 as User
+participant "前端" as FE
+participant "SmartSchedulingController" as Ctrl
+participant "PlanningSmartServiceImpl" as Svc
+participant "SolveServiceImpl" as Solver
+database "MySQL" as DB
+
+User -> FE: 提交排产任务信息
+FE -> Ctrl: POST /scheduling-task
+Ctrl -> Svc: generate(generatePlanningSmartDTO)
+
+group 前置校验
+  Svc -> Svc: Redis分布式锁，检查是否正在求解
+  Svc -> Svc: 校验策略是否存在且已生效
+  Svc -> DB: 加载基础数据（订单、工艺、资源、日历）
+  DB --> Svc: 基础数据
+end
+
+group 异步排产求解
+  Svc -> Solver: solve(planId, strategy, basicData)
+  Solver -> Solver: 构建初始可行解，执行MRP计算
+  Solver -> Solver: OptaPlanner元启发式搜索求解
+  Solver --> Svc: 最优Solution
+end
+
+group 保存排产结果
+  Svc -> Svc: 校验排程结果合规性
+  Svc -> DB: 批量INSERT计划任务
+  Svc -> DB: 更新任务状态COMPLETED
+end
+
+Svc --> Ctrl: 操作结果
+Ctrl --> FE: 成功响应
+FE --> User: 提示排产执行中
+
+@enduml

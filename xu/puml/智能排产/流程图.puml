@@ -1,0 +1,27 @@
+@startuml
+start
+:选择排产策略，填写任务信息并提交;
+:参数验证;
+
+if (验证通过?) then (是)
+  :保存任务，状态设为PENDING;
+  :异步启动排产引擎;
+  :加载基础数据，构建规划模型;
+  :调用OptaPlanner求解，获得最优方案;
+
+  if (求解成功?) then (是)
+    :生成计划任务，状态更新为COMPLETED;
+    :操作人员查看并确认计划;
+    :下发计划任务，状态更新为RELEASED;
+  else (否)
+    :标记排产失败;
+    stop
+  endif
+else (否)
+  :返回错误提示;
+  stop
+endif
+
+stop
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+skinparam shadowing false
+skinparam defaultFontSize 13
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam ParticipantPadding 8
+skinparam BoxPadding 5
+skinparam sequenceArrowThickness 1.5
+hide footbox
+
+actor 操作人员 as User
+participant "前端" as FE
+participant "MaterialController" as Ctrl
+participant "MaterialServiceImpl" as Svc
+database "MySQL" as DB
+
+User -> FE: 填写物料信息并提交
+FE -> FE: 表单验证
+FE -> Ctrl: POST /material
+
+Ctrl -> Svc: save(saveMaterialDTO)
+Svc -> Svc: DTO转换为MaterialPO
+
+group 编码唯一性校验
+  Svc -> DB: 查询编码是否存在
+  DB --> Svc: 返回数量
+end
+
+group 编码重复
+  Svc --> Ctrl: 抛出业务异常
+  Ctrl --> FE: 错误响应
+  FE --> User: 显示错误提示
+end
+
+group 编码唯一
+  Svc -> Svc: 设置默认值
+  Svc -> DB: INSERT物料数据
+  Svc --> Ctrl: 操作结果
+  Ctrl --> FE: 成功响应
+  FE --> User: 刷新列表并提示成功
+end
+
+@enduml
